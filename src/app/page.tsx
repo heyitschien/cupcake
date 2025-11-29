@@ -611,7 +611,7 @@ export default function Home() {
             <div className="text-center">
               <div className="inline-block bg-gradient-to-r from-[#ff4f8b] via-[#ff7bb0] to-[#ffe5b4] px-4 py-2 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105">
                 <span className="text-sm font-bold text-white drop-shadow-md">
-                  {cupcakeName ?? "✨ Tap &quot;Random Cupcake&quot; to get a magic name! ✨"}
+                  {cupcakeName ?? "✨ Tap the Random button to get a magic name! ✨"}
                 </span>
               </div>
             </div>
