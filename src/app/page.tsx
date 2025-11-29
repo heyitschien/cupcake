@@ -451,8 +451,8 @@ export default function Home() {
         </div>
 
         <div className="w-full max-w-md rounded-3xl bg-white/95 backdrop-blur-sm shadow-2xl px-4 py-5 sm:px-5 sm:py-6 relative z-10 transform transition-all duration-300 hover:scale-[1.01]">
-          <header className="text-center mb-4 relative">
-            <div className="absolute top-0 right-0 flex gap-2">
+          <header className="text-center mb-4">
+            <div className="flex justify-end gap-2 mb-2">
               <Link
                 href="/gallery"
                 className="text-xl transform transition-all duration-200 hover:scale-110 active:scale-95"
