@@ -39,5 +39,3 @@ Deploy easily to Vercel:
 3. Deploy with one click!
 
 Made with love for Uncle Chien & the nieces 🧁
-
-# cupcake
