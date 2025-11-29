@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { CupcakeData, encodeCupcakeData } from "@/utils/cupcakeUtils";
@@ -36,13 +36,34 @@ const TOPPINGS = [
 ];
 
 function CupcakeThumbnail({ cupcake }: { cupcake: CupcakeData }) {
-  const base = BASES[cupcake.baseIndex] ?? BASES[0];
-  const frosting = FROSTINGS[cupcake.frostingIndex] ?? FROSTINGS[0];
-  const topping = TOPPINGS[cupcake.toppingIndex] ?? TOPPINGS[0];
+  // Validate and sanitize indices to prevent errors
+  const baseIndex = typeof cupcake.baseIndex === "number" && cupcake.baseIndex >= 0 && cupcake.baseIndex < BASES.length
+    ? cupcake.baseIndex
+    : 0;
+  const frostingIndex = typeof cupcake.frostingIndex === "number" && cupcake.frostingIndex >= 0 && cupcake.frostingIndex < FROSTINGS.length
+    ? cupcake.frostingIndex
+    : 0;
+  const toppingIndex = typeof cupcake.toppingIndex === "number" && cupcake.toppingIndex >= 0 && cupcake.toppingIndex < TOPPINGS.length
+    ? cupcake.toppingIndex
+    : 0;
+
+  const base = BASES[baseIndex] ?? BASES[0];
+  const frosting = FROSTINGS[frostingIndex] ?? FROSTINGS[0];
+  const topping = TOPPINGS[toppingIndex] ?? TOPPINGS[0];
+
+  // Safely encode cupcake data
+  let encodedData = "";
+  try {
+    encodedData = encodeCupcakeData(cupcake);
+  } catch (error) {
+    console.error("Failed to encode cupcake data:", error);
+    // Fallback to home page without data
+    encodedData = "";
+  }
 
   return (
     <Link
-      href={`/?cupcake=${encodeCupcakeData(cupcake)}`}
+      href={encodedData ? `/?cupcake=${encodedData}` : "/"}
       className="block bg-white rounded-2xl p-4 shadow-md hover:shadow-xl transform transition-all duration-200 hover:scale-105"
     >
       <div className="flex items-center justify-center mb-3">
@@ -61,10 +82,10 @@ function CupcakeThumbnail({ cupcake }: { cupcake: CupcakeData }) {
         </div>
       </div>
       <h3 className="text-sm font-bold text-center text-slate-800 truncate">
-        {cupcake.name}
+        {cupcake.name || "Unnamed Cupcake"}
       </h3>
       <p className="text-xs text-slate-500 text-center mt-1">
-        {new Date(cupcake.createdAt).toLocaleDateString()}
+        {cupcake.createdAt ? new Date(cupcake.createdAt).toLocaleDateString() : "Unknown date"}
       </p>
     </Link>
   );
@@ -74,6 +95,34 @@ export default function GalleryPage() {
   const [savedCupcakes, setSavedCupcakes] = useLocalStorage<CupcakeData[]>("saved-cupcakes", []);
   const [deleteMode, setDeleteMode] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Filter and validate saved cupcakes
+  const validCupcakes = savedCupcakes.filter((cupcake) => {
+    return (
+      cupcake &&
+      typeof cupcake === "object" &&
+      typeof cupcake.id === "string" &&
+      typeof cupcake.baseIndex === "number" &&
+      typeof cupcake.frostingIndex === "number" &&
+      typeof cupcake.toppingIndex === "number" &&
+      typeof cupcake.name === "string" &&
+      typeof cupcake.createdAt === "number" &&
+      cupcake.baseIndex >= 0 &&
+      cupcake.baseIndex < BASES.length &&
+      cupcake.frostingIndex >= 0 &&
+      cupcake.frostingIndex < FROSTINGS.length &&
+      cupcake.toppingIndex >= 0 &&
+      cupcake.toppingIndex < TOPPINGS.length
+    );
+  });
+
+  // Update localStorage if invalid cupcakes were found
+  useEffect(() => {
+    if (validCupcakes.length !== savedCupcakes.length) {
+      setSavedCupcakes(validCupcakes);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleDelete(id: string) {
     if (deleteMode) {
@@ -105,13 +154,13 @@ export default function GalleryPage() {
             🧁 My Cupcakes 🧁
           </h1>
           <p className="text-slate-600">
-            {savedCupcakes.length === 0
+            {validCupcakes.length === 0
               ? "No saved cupcakes yet. Create and save some cupcakes!"
-              : `${savedCupcakes.length} saved cupcake${savedCupcakes.length !== 1 ? "s" : ""}`}
+              : `${validCupcakes.length} saved cupcake${validCupcakes.length !== 1 ? "s" : ""}`}
           </p>
         </header>
 
-        {savedCupcakes.length > 0 && (
+        {validCupcakes.length > 0 && (
           <div className="flex justify-center mb-4">
             <button
               onClick={() => setDeleteMode(!deleteMode)}
@@ -126,7 +175,7 @@ export default function GalleryPage() {
           </div>
         )}
 
-        {savedCupcakes.length === 0 ? (
+        {validCupcakes.length === 0 ? (
           <div className="text-center py-12 bg-white/90 rounded-3xl shadow-lg">
             <div className="text-6xl mb-4">🧁</div>
             <p className="text-xl text-slate-600 mb-4">No cupcakes saved yet!</p>
@@ -139,7 +188,7 @@ export default function GalleryPage() {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {savedCupcakes.map((cupcake) => (
+            {validCupcakes.map((cupcake) => (
               <div
                 key={cupcake.id}
                 className={`relative ${deletingId === cupcake.id ? "opacity-0 scale-0 transition-all duration-300" : ""}`}
