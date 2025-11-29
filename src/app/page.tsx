@@ -199,6 +199,7 @@ export default function Home() {
         toppingsTried: Array.isArray(stats.toppingsTried) ? stats.toppingsTried : [],
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const cupcakeRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number>(0);
@@ -218,9 +219,10 @@ export default function Home() {
       if (cupcakeData) {
         try {
           const decoded = JSON.parse(atob(cupcakeData));
-          setBaseIndex(decoded.baseIndex || 0);
-          setFrostingIndex(decoded.frostingIndex || 0);
-          setToppingIndex(decoded.toppingIndex || 0);
+          setBaseIndex(decoded.baseIndex ?? 0);
+          setFrostingIndex(decoded.frostingIndex ?? 0);
+          setToppingIndex(decoded.toppingIndex ?? 0);
+          setEffectIndex(decoded.effectIndex ?? 0);
           if (decoded.name) setCupcakeName(decoded.name);
         } catch (e) {
           console.error("Failed to decode cupcake data");
@@ -354,11 +356,12 @@ export default function Home() {
       baseIndex,
       frostingIndex,
       toppingIndex,
+      effectIndex,
       name: cupcakeName,
       createdAt: Date.now(),
     };
 
-    setSavedCupcakes([...savedCupcakes, cupcakeData]);
+    setSavedCupcakes((prev) => [...prev, cupcakeData]);
     playSound("success", soundsEnabled);
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 2000);

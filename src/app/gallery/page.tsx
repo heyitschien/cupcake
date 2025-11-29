@@ -36,9 +36,9 @@ const TOPPINGS = [
 ];
 
 function CupcakeThumbnail({ cupcake }: { cupcake: CupcakeData }) {
-  const base = BASES[cupcake.baseIndex] || BASES[0];
-  const frosting = FROSTINGS[cupcake.frostingIndex] || FROSTINGS[0];
-  const topping = TOPPINGS[cupcake.toppingIndex] || TOPPINGS[0];
+  const base = BASES[cupcake.baseIndex] ?? BASES[0];
+  const frosting = FROSTINGS[cupcake.frostingIndex] ?? FROSTINGS[0];
+  const topping = TOPPINGS[cupcake.toppingIndex] ?? TOPPINGS[0];
 
   return (
     <Link
@@ -79,11 +79,14 @@ export default function GalleryPage() {
     if (deleteMode) {
       setDeletingId(id);
       setTimeout(() => {
-        setSavedCupcakes(savedCupcakes.filter((c) => c.id !== id));
+        setSavedCupcakes((prev) => {
+          const filtered = prev.filter((c) => c.id !== id);
+          if (filtered.length === 0) {
+            setDeleteMode(false);
+          }
+          return filtered;
+        });
         setDeletingId(null);
-        if (savedCupcakes.length === 1) {
-          setDeleteMode(false);
-        }
       }, 300);
     }
   }

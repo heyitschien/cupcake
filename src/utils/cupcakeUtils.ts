@@ -3,6 +3,7 @@ export type CupcakeData = {
   baseIndex: number;
   frostingIndex: number;
   toppingIndex: number;
+  effectIndex?: number; // Optional for backward compatibility
   name: string;
   createdAt: number;
 };
